@@ -1,0 +1,13 @@
+HTTP/1.1 400 Bad Request
+Date: Mon, 04 May 2026 10:19:11 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 191
+Connection: keep-alive
+x-api-mesh-served: 0
+x-request-id: b7664e35-0ecf-4e52-ba24-8e55c9739e64
+Vary: accept-encoding
+Server: cloudflare
+CF-RAY: 9f66c40739f26cd6-BLR
+alt-svc: h3=":443"; ma=86400
+
+{"errors":[{"message":"POST body sent invalid JSON.","extensions":{"originalError":{"name":"SyntaxError","message":"Expected property name or '}' in JSON at position 1 (line 1 column 2)"}}}]}
