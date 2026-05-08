@@ -25,7 +25,7 @@ application:
               include-ims-credentials: true
           order-event-consumer:
             function: actions/order-event-consumer/index.js
-            web: 'yes'
+            web: 'no'
             runtime: nodejs:22
             inputs:
               LOG_LEVEL: info
