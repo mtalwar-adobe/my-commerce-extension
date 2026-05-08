@@ -47,7 +47,7 @@ application:
             inputs:
               LOG_LEVEL: debug
             limits:
-              timeout: 10000
+              timeout: 60000
               memorySize: 256
             annotations:
               require-adobe-auth: false
