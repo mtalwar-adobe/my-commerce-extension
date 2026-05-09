@@ -1,0 +1,26 @@
+{
+  "adminUiSdk": {
+    "registration": {
+      "menuItems": [
+        {
+          "id": "order_enrichment_admin::apps",
+          "isSection": true,
+          "sortOrder": 100,
+          "title": "Order Enrichment"
+        },
+        {
+          "id": "order_enrichment_admin::enriched_orders",
+          "parent": "order_enrichment_admin::apps",
+          "sortOrder": 1,
+          "title": "Enriched Orders"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "description": "Commerce extensibility and Admin UI SDK lab — product enrichment and admin dashboard.",
+    "displayName": "Order enrichment admin",
+    "id": "order-enrichment-admin",
+    "version": "1.0.0"
+  }
+}

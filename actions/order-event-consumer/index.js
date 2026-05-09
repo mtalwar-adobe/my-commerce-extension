@@ -133,6 +133,25 @@ async function main(params) {
       );
     }
 
+    const knownOrdersResult = await state.get('known-order-ids');
+    let knownOrderIds = [];
+    if (knownOrdersResult && knownOrdersResult.value) {
+      try {
+        knownOrderIds = JSON.parse(knownOrdersResult.value);
+      } catch {
+        knownOrderIds = [];
+      }
+    }
+    if (!knownOrderIds.includes(String(orderId))) {
+      knownOrderIds.push(String(orderId));
+      if (knownOrderIds.length > 100) {
+        knownOrderIds = knownOrderIds.slice(-100);
+      }
+      await state.put('known-order-ids', JSON.stringify(knownOrderIds), {
+        ttl: 604800,
+      });
+    }
+
     logger.info(`Successfully processed event ${eventId} for order ${orderId}`);
     return {
       statusCode: 200,

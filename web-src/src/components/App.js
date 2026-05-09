@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Provider, defaultTheme, Grid, View } from '@adobe/react-spectrum'
-import ErrorBoundary from 'react-error-boundary'
+import { ErrorBoundary } from 'react-error-boundary'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import SideBar from './SideBar'
 import ActionsForm from './ActionsForm'

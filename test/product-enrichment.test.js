@@ -2,79 +2,131 @@
 * <license header>
 */
 
+jest.mock('../actions/ims-token.js', () => ({
+  getImsAccessToken: jest.fn(),
+}));
+
 jest.mock('@adobe/aio-sdk', () => ({
   Core: {
-    Logger: jest.fn()
+    Logger: jest.fn(),
   },
-  Events: {
-    init: jest.fn()
-  }
-}))
+}));
 
-const { Core, Events } = require('@adobe/aio-sdk')
-const mockEventsInstance = { publishEvent: jest.fn() }
-const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() }
-Core.Logger.mockReturnValue(mockLoggerInstance)
+const { Core } = require('@adobe/aio-sdk');
+const { getImsAccessToken } = require('../actions/ims-token.js');
+const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
+Core.Logger.mockReturnValue(mockLoggerInstance);
 
-Events.init.mockReturnValue(mockEventsInstance)
+const action = require('../actions/product-enrichment/index.js');
 
-const action = require('./../actions/product-enrichment/index.js')
+const baseParams = {
+  sku: 'TEST-SKU',
+  COMMERCE_API_BASE_URL: 'https://api.commerce.adobe.com',
+  IMS_OAUTH_S2S_CLIENT_ID: 'fakeClientId',
+  IMS_OAUTH_S2S_ORG_ID: 'fakeOrgId',
+};
 
 beforeEach(() => {
-  Events.init.mockClear() // only clears calls stats
-  jest.clearAllMocks()
-  Core.Logger.mockClear()
-  mockLoggerInstance.info.mockReset()
-  mockLoggerInstance.debug.mockReset()
-  mockLoggerInstance.error.mockReset()
-})
+  jest.clearAllMocks();
+  Core.Logger.mockReturnValue(mockLoggerInstance);
+  mockLoggerInstance.info.mockReset();
+  mockLoggerInstance.debug.mockReset();
+  mockLoggerInstance.error.mockReset();
+  getImsAccessToken.mockResolvedValue('fake-access-token');
+  global.fetch = jest.fn();
+});
 
-const fakeRequestParams = { apiKey: 'fakeKey', providerId: 'fakeProvider', eventCode: 'fakeEventCode', payload: {hello: 'world'}, __ow_headers: { authorization: 'Bearer fakeToken', 'x-gw-ims-org-id': 'fakeOrgId' } }
 describe('product-enrichment', () => {
   test('main should be defined', () => {
-    expect(action.main).toBeInstanceOf(Function)
-  })
+    expect(action.main).toBeInstanceOf(Function);
+  });
+
   test('should set logger to use LOG_LEVEL param', async () => {
-    await action.main({ ...fakeRequestParams, LOG_LEVEL: 'fakeLevel' })
-    expect(Core.Logger).toHaveBeenCalledWith(expect.any(String), { level: 'fakeLevel' })
-  })
-  test('events sdk should be initialized with input credentials', async () => {
-    await action.main({ ...fakeRequestParams, otherParam: 'fake4' })
-    expect(Events.init).toHaveBeenCalledWith('fakeOrgId', 'fakeKey', 'fakeToken' )
-  })
-  test('should return an http response with 200 status code if successful', async () => {
-    mockEventsInstance.publishEvent = jest.fn().mockReturnValue('OK')
-    const response = await action.main(fakeRequestParams)
-    expect(response).toEqual(expect.objectContaining({
-      statusCode: 200
-    }))
-  })
-  test('should return an http response with 204 status code if successful', async () => {
-    mockEventsInstance.publishEvent = jest.fn().mockReturnValue(undefined)
-    const response = await action.main(fakeRequestParams)
-    expect(response).toEqual(expect.objectContaining({
-      statusCode: 204
-    }))
-  })
-  test('if there is an error should return a 500 and log the error', async () => {
-    const fakeError = new Error('fake')
-    mockEventsInstance.publishEvent = jest.fn().mockRejectedValue(fakeError)
-    const response = await action.main(fakeRequestParams)
-    expect(response).toEqual(expect.objectContaining({
-      error: {
-        statusCode: 500,
-        body: { error: 'server error' }
-      }
-    }))
-    expect(mockLoggerInstance.error).toHaveBeenCalledWith(fakeError)
-  })
-  test('missing input request parameters, should return 400', async () => {
-    const response = await action.main({})
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ sku: 'TEST-SKU', name: 'N', price: 1 }),
+    });
+    await action.main({ ...baseParams, LOG_LEVEL: 'fakeLevel' });
+    expect(Core.Logger).toHaveBeenCalledWith(expect.any(String), { level: 'fakeLevel' });
+  });
+
+  test('missing sku should return 400', async () => {
+    const response = await action.main({ ...baseParams, sku: undefined });
     expect(response).toEqual({
-      error: {
-        statusCode: 400,
-        body: { error: 'missing header(s) \'authorization,x-gw-ims-org-id\' and missing parameter(s) \'apiKey,providerId,eventCode,payload\'' }
-      }
-    })
-  })
-})
+      statusCode: 400,
+      body: { error: 'Missing required parameter: sku' },
+    });
+  });
+
+  test('missing COMMERCE_API_BASE_URL should return 400', async () => {
+    const response = await action.main({ sku: 'X' });
+    expect(response).toEqual({
+      statusCode: 400,
+      body: { error: 'Missing COMMERCE_API_BASE_URL' },
+    });
+  });
+
+  test('should return 200 with enriched product when Commerce API succeeds', async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        sku: 'TEST-SKU',
+        name: 'Test Product',
+        price: 9.99,
+      }),
+    });
+
+    const response = await action.main(baseParams);
+
+    expect(getImsAccessToken).toHaveBeenCalledWith(baseParams);
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://api.commerce.adobe.com/V1/products/TEST-SKU',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: 'Bearer fake-access-token',
+          'x-api-key': 'fakeClientId',
+          'x-gw-ims-org-id': 'fakeOrgId',
+        }),
+      }),
+    );
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        sku: 'TEST-SKU',
+        name: 'Test Product',
+        price: 9.99,
+        estimatedDelivery: '3-5 business days',
+      }),
+    );
+    expect(response.body.sustainabilityScore).toBeGreaterThanOrEqual(60);
+    expect(response.body.sustainabilityScore).toBeLessThanOrEqual(99);
+    expect(typeof response.body.enrichedAt).toBe('string');
+  });
+
+  test('should return Commerce API status when response is not ok', async () => {
+    global.fetch.mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+    });
+
+    const response = await action.main(baseParams);
+
+    expect(response.statusCode).toBe(404);
+    expect(response.body.error).toContain('Commerce API error');
+    expect(response.body.hint).toBeDefined();
+  });
+
+  test('should return 500 and log when getImsAccessToken fails', async () => {
+    getImsAccessToken.mockRejectedValue(new Error('ims down'));
+
+    const response = await action.main(baseParams);
+
+    expect(response).toEqual({
+      statusCode: 500,
+      body: { error: 'Internal server error', detail: 'ims down' },
+    });
+    expect(mockLoggerInstance.error).toHaveBeenCalledWith('Action failed:', 'ims down');
+  });
+});

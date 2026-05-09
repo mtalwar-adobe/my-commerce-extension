@@ -4,7 +4,7 @@
 
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 
 import Runtime, { init } from '@adobe/exc-app'
 
@@ -30,9 +30,8 @@ function bootstrapRaw () {
   const mockIms = {}
 
   // render the actual react application and pass along the runtime object to make it available to the App
-  ReactDOM.render(
+  createRoot(document.getElementById('root')).render(
     <App runtime={mockRuntime} ims={mockIms} />,
-    document.getElementById('root')
   )
 }
 
@@ -57,9 +56,8 @@ function bootstrapInExcShell () {
       token: imsToken
     }
     // render the actual react application and pass along the runtime and ims objects to make it available to the App
-    ReactDOM.render(
+    createRoot(document.getElementById('root')).render(
       <App runtime={runtime} ims={ims} />,
-      document.getElementById('root')
     )
   })
 
