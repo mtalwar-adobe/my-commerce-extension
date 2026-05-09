@@ -1,0 +1,50 @@
+{
+  "project": {
+    "id": "4566206088345664692",
+    "name": "575ErinStarfish",
+    "title": "Commerce OoP Project Joe",
+    "org": {
+      "id": "3117813",
+      "name": "ACCS - PM and Engineering",
+      "ims_org_id": "045013D3664331DC0A495CD5@AdobeOrg"
+    },
+    "workspace": {
+      "id": "4566206088345701179",
+      "name": "Stage",
+      "title": "Stage",
+      "action_url": "https://3117813-575erinstarfish-stage.adobeioruntime.net",
+      "app_url": "https://3117813-575erinstarfish-stage.adobeio-static.net",
+      "details": {
+        "credentials": [
+          {
+            "id": "969355",
+            "name": "Credential_in_Commerce_OoP_Project_Joe_-_Stage",
+            "integration_type": "oauth_server_to_server"
+          }
+        ],
+        "services": [
+          {
+            "code": "ACCS-REST-API",
+            "name": "Adobe Commerce as a Cloud Service"
+          },
+          {
+            "code": "AdobeIOManagementAPISDK",
+            "name": "I/O Management API"
+          },
+          {
+            "code": "CloudIntegrationSDK",
+            "name": "I/O Events"
+          },
+          {
+            "code": "commerceeventing",
+            "name": "Adobe I/O Events for Adobe Commerce"
+          }
+        ],
+        "events": {
+          "registrations": []
+        },
+        "mesh": {}
+      }
+    }
+  }
+}
