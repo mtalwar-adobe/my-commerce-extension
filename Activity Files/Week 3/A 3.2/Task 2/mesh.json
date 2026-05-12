@@ -1,0 +1,30 @@
+{
+    "meshConfig": {
+      "sources": [
+        {
+          "name": "Commerce",
+          "handler": {
+            "graphql": {
+              "endpoint": "https://<your-commerce-host>/graphql"
+            }
+          }
+        },
+        {
+          "name": "Enrichment",
+          "handler": {
+            "openapi": {
+              "source": "./enrichment-openapi.json"
+            }
+          },
+          "transforms": [
+            {
+              "prefix": {
+                "value": "Enrichment_",
+                "includeRootOperations": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }

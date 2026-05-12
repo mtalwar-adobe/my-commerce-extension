@@ -1,0 +1,69 @@
+To verify whether the product data is fetched from Commerce source, run the following command:
+
+Windows (PowerShell7+):
+
+$query = @{ query = "{ products(skus: [""ACM-3030""]) { sku name __typename ... on SimpleProductView { price { final { amount { value currency } } } } } }"} | ConvertTo-Json
+Invoke-RestMethod -Method Post `
+  -Uri "https://edge-sandbox-graph.adobe.io/api/3db6ea7b-a0a2-46b7-8268-647c17424843/graphql" `
+  -ContentType "application/json" `
+  -Headers @{ "Magento-Website-Code" = "base" } `
+  -Body $query | ConvertTo-Json -Depth 10
+
+__________________________________________________________________________________________________
+
+Mac and Linux:
+
+curl -X POST "https://edge-sandbox-graph.adobe.io/api/3db6ea7b-a0a2-46b7-8268-647c17424843/graphql" \
+  -H "Content-Type: application/json" \
+  -H "Magento-Website-Code: base" \
+  -d '{"query":"{ products(skus: [\"ACM-3030\"]) { sku name __typename ... on SimpleProductView { price { final { amount { value currency } } } } } }"}' | jq .
+
+
+**************************************************************************************************************************************************************************************************************
+
+To query the enrichment data through the mesh, run the following command:
+
+Windows (PowerShell7+):
+
+$query = @{
+    query = "{ Enrichment_getProductEnrichment(sku: ""ACM-3030"") { sku name sustainabilityScore estimatedDelivery enrichedAt } }"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Method Post `
+  -Uri "https://edge-sandbox-graph.adobe.io/api/3db6ea7b-a0a2-46b7-8268-647c17424843/graphql" `
+  -ContentType "application/json" `
+  -Body $query | ConvertTo-Json -Depth 10
+
+__________________________________________________________________________________________________
+
+Mac and Linux:
+
+curl -X POST "https://edge-sandbox-graph.adobe.io/api/3db6ea7b-a0a2-46b7-8268-647c17424843/graphql" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{ Enrichment_getProductEnrichment(sku: \"ACM-3030\") { sku name sustainabilityScore estimatedDelivery enrichedAt } }"}' | jq .
+
+******************************************************************************************************************************************************************************************************************
+
+To run a single query that fetches data from both sources, run the following command:
+
+Windows (PowerShell7+):
+
+
+$query = '{"query":"{ products(skus: [\"ACM-3030\"]) { sku name __typename ... on SimpleProductView { price { final { amount { value currency } } } } } Enrichment_getProductEnrichment(sku: \"ACM-3030\") { sku name sustainabilityScore estimatedDelivery enrichedAt } }"}'
+
+$response = Invoke-WebRequest -Method Post `
+  -Uri "https://edge-sandbox-graph.adobe.io/api/3db6ea7b-a0a2-46b7-8268-647c17424843/graphql" `
+  -ContentType "application/json" `
+  -Headers @{ "Magento-Website-Code" = "base" } `
+  -Body $query
+
+$response.Content | ConvertFrom-Json | ConvertTo-Json -Depth 10
+
+______________________________________________________________________________________________________
+
+Mac and Linux:
+
+curl -X POST "https://edge-sandbox-graph.adobe.io/api/3db6ea7b-a0a2-46b7-8268-647c17424843/graphql" \
+  -H "Content-Type: application/json" \
+  -H "Magento-Website-Code: base" \
+  -d '{"query":"{ products(skus: [\"ACM-3030\"]) { sku name __typename ... on SimpleProductView { price { final { amount { value currency } } } } } Enrichment_getProductEnrichment(sku: \"ACM-3030\") { sku name sustainabilityScore estimatedDelivery enrichedAt } }"}' | jq .

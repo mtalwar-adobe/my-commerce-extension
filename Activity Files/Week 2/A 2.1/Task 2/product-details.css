@@ -1,0 +1,11 @@
+.product-details__stock {
+font-size: 1.5rem;
+font-weight: 600;
+margin-top: 0.25rem;
+}
+.stock-badge--in-stock {
+color: #2d7d2d;
+}
+.stock-badge--out-of-stock {
+color: #cc0000;
+}
