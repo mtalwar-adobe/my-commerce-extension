@@ -1,30 +1,44 @@
 {
-    "meshConfig": {
-      "sources": [
-        {
-          "name": "Commerce",
-          "handler": {
-            "graphql": {
-              "endpoint": "https://na1-sandbox.api.commerce.adobe.com/D1cCxB3r3ktTdfrkSFPG8b/graphql"
+  "meshConfig": {
+    "sources": [
+      {
+        "name": "Commerce",
+        "handler": {
+          "graphql": {
+            "endpoint": "https://na1.api.commerce.adobe.com/8X63TqmZvU59e5CLnvqZ7w/graphql",
+            "operationHeaders": {
+              "Magento-Website-Code": "base",
+              "Magento-Store-Code": "default",
+              "Magento-Store-View-Code": "default",
+              "Magento-Environment-Id": "{context.headers['magento-environment-id']}"
             }
           }
-        },
-        {
-          "name": "Enrichment",
-          "handler": {
-            "openapi": {
-              "source": "./enrichment-openapi.json"
-            }
-          },
-          "transforms": [
-            {
-              "prefix": {
-                "value": "Enrichment_",
-                "includeRootOperations": true
-              }
-            }
-          ]
         }
-      ]
-    }
+      },
+      {
+        "name": "Enrichment",
+        "transforms": [
+          {
+            "prefix": {
+              "value": "Enrichment_",
+              "includeRootOperations": true
+            }
+          }
+        ],
+        "handler": {
+          "openapi": {
+            "source": "./enrichment-openapi.json"
+          }
+        }
+      }
+    ],
+    "files": [
+      {
+        "path": "./enrichment-openapi.json",
+        "content": "{\"openapi\":\"3.0.0\",\"info\":{\"title\":\"Product Enrichment API\",\"version\":\"1.0.0\",\"description\":\"Custom product enrichment service via I/O Runtime\"},\"servers\":[{\"url\":\"https://3967933-670bluesmelt-stage.adobeioruntime.net/api/v1/web/my-commerce-extension\"}],\"paths\":{\"/product-enrichment\":{\"get\":{\"operationId\":\"getProductEnrichment\",\"summary\":\"Get enriched product data\",\"parameters\":[{\"name\":\"sku\",\"in\":\"query\",\"required\":true,\"schema\":{\"type\":\"string\"},\"description\":\"The product SKU to enrich\"}],\"responses\":{\"200\":{\"description\":\"Enriched product data\",\"content\":{\"application/json\":{\"schema\":{\"type\":\"object\",\"properties\":{\"sku\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"},\"sustainabilityScore\":{\"type\":\"integer\"},\"estimatedDelivery\":{\"type\":\"string\"},\"enrichedAt\":{\"type\":\"string\"}}}}}}}}}}}"
+      }
+    ]
   }
+}
+
+
