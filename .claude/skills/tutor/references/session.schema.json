@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentskills.io/adobe-commerce/tutor/session.schema.json",
+  "title": "Learning Session",
+  "description": "Records a single learning session with timestamps, activities, and outcomes.",
+  "type": "object",
+  "required": ["startTime"],
+  "properties": {
+    "startTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the session started"
+    },
+    "endTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the session ended"
+    },
+    "resumedFrom": {
+      "type": "string",
+      "description": "Topic ID where the learner resumed from"
+    },
+    "durationMinutes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total session duration in minutes"
+    },
+    "activities": {
+      "type": "array",
+      "description": "List of activities performed during the session",
+      "items": { "$ref": "#/$defs/activity" }
+    },
+    "topicsCovered": {
+      "type": "array",
+      "description": "IDs of topics covered in this session",
+      "items": { "type": "string" }
+    },
+    "quizzesTaken": {
+      "type": "array",
+      "description": "IDs of quizzes taken during this session",
+      "items": { "type": "string" }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Learner's notes saved at session end"
+    }
+  },
+  "$defs": {
+    "activity": {
+      "type": "object",
+      "required": ["type", "timestamp"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "topic-started",
+            "topic-completed",
+            "topic-skipped",
+            "quiz-started",
+            "quiz-completed",
+            "assignment-started",
+            "assignment-submitted",
+            "review-requested",
+            "note-saved"
+          ],
+          "description": "Type of activity performed"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the activity occurred"
+        },
+        "targetId": {
+          "type": "string",
+          "description": "ID of the topic, quiz, or assignment involved"
+        },
+        "details": {
+          "type": "object",
+          "description": "Additional activity-specific data",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}

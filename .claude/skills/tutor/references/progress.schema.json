@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentskills.io/adobe-commerce/tutor/progress.schema.json",
+  "title": "Learning Progress",
+  "description": "Tracks overall learning progress, completed topics, quiz scores, and achievements.",
+  "type": "object",
+  "required": ["overallProgress", "currentChapter", "topicsCompleted"],
+  "properties": {
+    "overallProgress": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Overall curriculum completion percentage (0-100)"
+    },
+    "currentChapter": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Chapter number currently being studied (0-indexed or 1-indexed based on curriculum)"
+    },
+    "currentTopic": {
+      "type": "string",
+      "description": "ID of the topic currently in progress"
+    },
+    "chaptersCompleted": {
+      "type": "array",
+      "description": "IDs of completed chapters",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          { "$ref": "#/$defs/chapterCompletion" }
+        ]
+      },
+      "uniqueItems": true
+    },
+    "topicsCompleted": {
+      "type": "array",
+      "description": "Detailed records of completed or skipped topics",
+      "items": { "$ref": "#/$defs/topicCompletion" }
+    },
+    "quizzesTaken": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of quizzes attempted"
+    },
+    "averageQuizScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Average score across all quizzes (0-100)"
+    },
+    "assignmentsCompleted": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of assignments successfully completed"
+    },
+    "assignmentsInProgress": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of assignments currently being worked on"
+    },
+    "totalStudyTimeMinutes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total accumulated study time in minutes"
+    },
+    "lastSessionDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the most recent learning session (YYYY-MM-DD)"
+    },
+    "streakDays": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Current consecutive days of study"
+    },
+    "longestStreak": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Longest consecutive days of study achieved"
+    },
+    "achievements": {
+      "type": "array",
+      "description": "Earned achievements and badges",
+      "items": { "$ref": "#/$defs/achievement" }
+    }
+  },
+  "$defs": {
+    "topicCompletion": {
+      "type": "object",
+      "required": ["id", "completedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Topic identifier matching curriculum.json"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when topic was completed (YYYY-MM-DD)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["completed", "skipped-known", "skipped-offline"],
+          "default": "completed",
+          "description": "How the topic was marked complete"
+        },
+        "score": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Quiz score for this topic (null if skipped or no quiz)"
+        }
+      }
+    },
+    "chapterCompletion": {
+      "type": "object",
+      "required": ["id", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Chapter identifier"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["completed", "skipped-known"],
+          "description": "How the chapter was completed"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Optional explanation for skipping"
+        }
+      }
+    },
+    "achievement": {
+      "type": "object",
+      "required": ["id", "name", "earnedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique achievement identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the achievement"
+        },
+        "earnedAt": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when achievement was earned"
+        }
+      }
+    }
+  }
+}

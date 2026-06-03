@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentskills.io/adobe-commerce/tutor/curriculum.schema.json",
+  "title": "Learning Curriculum",
+  "description": "Personalized learning path with chapters, topics, estimated times, and assessment markers.",
+  "type": "object",
+  "required": ["generatedFor", "generatedAt", "chapters"],
+  "properties": {
+    "generatedFor": {
+      "type": "string",
+      "description": "Name of the learner this curriculum was generated for"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the curriculum was created"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the curriculum was last modified"
+    },
+    "estimatedTotalHours": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Estimated total hours to complete the curriculum"
+    },
+    "chapters": {
+      "type": "array",
+      "description": "Ordered list of chapters in the curriculum",
+      "items": { "$ref": "#/$defs/chapter" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "chapter": {
+      "type": "object",
+      "required": ["id", "title", "topics"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Unique chapter identifier (lowercase, hyphens allowed)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title for the chapter"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief summary of what the chapter covers"
+        },
+        "estimatedHours": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Estimated hours to complete this chapter"
+        },
+        "topics": {
+          "type": "array",
+          "description": "Ordered list of topics within this chapter",
+          "items": { "$ref": "#/$defs/topic" },
+          "minItems": 1
+        },
+        "chapterQuiz": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this chapter has a comprehensive quiz at the end"
+        },
+        "chapterAssignment": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this chapter has a hands-on assignment"
+        }
+      }
+    },
+    "topic": {
+      "type": "object",
+      "required": ["id", "title"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Unique topic identifier (lowercase, hyphens allowed)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title for the topic"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief summary of what the topic covers"
+        },
+        "estimatedMinutes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Estimated minutes to complete this topic"
+        },
+        "hasQuiz": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this topic has a knowledge check quiz"
+        },
+        "hasAssignment": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this topic has a hands-on assignment"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["new", "already-completed", "skipped-prior", "in-progress"],
+          "description": "Current status of this topic for the learner"
+        },
+        "note": {
+          "type": "string",
+          "description": "Additional context about the topic status"
+        }
+      }
+    }
+  }
+}

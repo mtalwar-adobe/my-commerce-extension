@@ -1,0 +1,40 @@
+{
+  "startTime": "2024-01-20T14:00:00Z",
+  "endTime": "2024-01-20T15:30:00Z",
+  "resumedFrom": "events-fundamentals",
+  "durationMinutes": 90,
+  "activities": [
+    {
+      "type": "topic-started",
+      "timestamp": "2024-01-20T14:00:00Z",
+      "targetId": "events-fundamentals"
+    },
+    {
+      "type": "quiz-started",
+      "timestamp": "2024-01-20T14:45:00Z",
+      "targetId": "events-fundamentals-quiz"
+    },
+    {
+      "type": "quiz-completed",
+      "timestamp": "2024-01-20T14:52:00Z",
+      "targetId": "events-fundamentals-quiz",
+      "details": {
+        "score": 85,
+        "passed": true
+      }
+    },
+    {
+      "type": "topic-completed",
+      "timestamp": "2024-01-20T15:00:00Z",
+      "targetId": "events-fundamentals"
+    },
+    {
+      "type": "topic-started",
+      "timestamp": "2024-01-20T15:05:00Z",
+      "targetId": "events-schema-json"
+    }
+  ],
+  "topicsCovered": ["events-fundamentals", "events-schema-json"],
+  "quizzesTaken": ["events-fundamentals-quiz"],
+  "notes": "Need to review EVENTS_SCHEMA.json field structure more carefully."
+}

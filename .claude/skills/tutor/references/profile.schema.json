@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentskills.io/adobe-commerce/tutor/profile.schema.json",
+  "title": "Learner Profile",
+  "description": "Stores learner information, expertise levels, interests, and learning preferences for personalized curriculum generation.",
+  "type": "object",
+  "required": ["created", "name", "expertise"],
+  "properties": {
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the profile was created"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the profile was last modified"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Learner's display name"
+    },
+    "expertise": {
+      "type": "object",
+      "description": "Self-assessed or evaluated skill levels across key technologies",
+      "properties": {
+        "javascript": { "$ref": "#/$defs/expertiseLevel" },
+        "nodejs": { "$ref": "#/$defs/expertiseLevel" },
+        "adobeCommerce": { "$ref": "#/$defs/expertiseLevel" },
+        "appBuilder": { "$ref": "#/$defs/expertiseLevel" },
+        "serverless": { "$ref": "#/$defs/expertiseLevel" },
+        "eventDriven": { "$ref": "#/$defs/expertiseLevel" }
+      },
+      "additionalProperties": { "$ref": "#/$defs/expertiseLevel" }
+    },
+    "interests": {
+      "type": "array",
+      "description": "Topics or integration types the learner wants to focus on",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "goals": {
+      "type": "array",
+      "description": "Learning objectives the learner wants to achieve",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "learningStyle": {
+      "type": "string",
+      "enum": ["hands-on", "reading", "video-style", "mixed"],
+      "description": "Preferred learning approach"
+    },
+    "availableTimePerWeek": {
+      "type": "string",
+      "enum": ["< 5 hours", "5-10 hours", "10-20 hours", "> 20 hours"],
+      "description": "Weekly time commitment for learning"
+    },
+    "preferredSessionLength": {
+      "type": "string",
+      "enum": ["15-30 minutes", "30-60 minutes", "60-90 minutes", "> 90 minutes"],
+      "description": "Preferred duration for each learning session"
+    }
+  },
+  "$defs": {
+    "expertiseLevel": {
+      "type": "string",
+      "enum": ["none", "beginner", "intermediate", "advanced"],
+      "description": "Skill proficiency level"
+    }
+  }
+}

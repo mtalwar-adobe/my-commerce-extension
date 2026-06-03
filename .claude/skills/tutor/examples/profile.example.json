@@ -1,0 +1,26 @@
+{
+  "created": "2024-01-15T10:30:00Z",
+  "lastUpdated": "2024-01-20T14:00:00Z",
+  "name": "Developer Name",
+  "expertise": {
+    "javascript": "intermediate",
+    "nodejs": "intermediate",
+    "adobeCommerce": "beginner",
+    "appBuilder": "none",
+    "serverless": "beginner",
+    "eventDriven": "beginner"
+  },
+  "interests": [
+    "order-management-integrations",
+    "customer-sync",
+    "real-time-inventory"
+  ],
+  "goals": [
+    "Build production-ready extensions",
+    "Understand event-driven architecture",
+    "Master the 6-file pattern"
+  ],
+  "learningStyle": "hands-on",
+  "availableTimePerWeek": "5-10 hours",
+  "preferredSessionLength": "30-60 minutes"
+}

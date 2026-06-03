@@ -17,13 +17,32 @@ import {
   Row,
   Cell,
 } from '@adobe/react-spectrum';
-import appConfig from '../config.json';
+import appConfigImport from '../config.json';
 
-/** Injected at build/deploy; keys mirror other Commerce UI extensions (see config.json). */
-const ACTION_URL =
-  appConfig.getEnrichedOrders ||
-  appConfig['admin-ui-sdk/get-enriched-orders'] ||
-  appConfig['get-enriched-orders'];
+/** Parcel/babel may expose JSON as `{ default: {...} }` or the object directly. */
+function resolveAppConfig (raw) {
+  if (!raw || typeof raw !== 'object') {
+    return {};
+  }
+  return raw.default && typeof raw.default === 'object' ? raw.default : raw;
+}
+
+/** Injected at build/deploy into config.json (see aio app deploy / get-url). */
+function getEnrichedOrdersUrl (cfg) {
+  const direct =
+    cfg.getEnrichedOrders ||
+    cfg['admin-ui-sdk/get-enriched-orders'] ||
+    cfg['get-enriched-orders'];
+  if (direct) {
+    return direct;
+  }
+  const registration =
+    cfg['admin-ui-sdk/registration'] || cfg.registration;
+  if (registration && typeof registration === 'string') {
+    return registration.replace(/\/registration\/?$/, '/get-enriched-orders');
+  }
+  return null;
+}
 
 export function MainPage () {
   const [loading, setLoading] = useState(true);
@@ -37,12 +56,14 @@ export function MainPage () {
         const guestConnection = await attach({ id: extensionId });
         const context = guestConnection.sharedContext;
         const imsToken = context.get('imsToken');
-        if (!ACTION_URL || typeof ACTION_URL !== 'string') {
+        const appConfig = resolveAppConfig(appConfigImport);
+        const actionUrl = getEnrichedOrdersUrl(appConfig);
+        if (!actionUrl || typeof actionUrl !== 'string') {
           throw new Error(
             'No action URL for get-enriched-orders in config.json. Redeploy the app so the Admin UI extension build picks up admin-ui-sdk/get-enriched-orders.',
           );
         }
-        const response = await fetch(ACTION_URL, {
+        const response = await fetch(actionUrl, {
           headers: {
             Authorization: `Bearer ${imsToken}`,
             'Content-Type': 'application/json',

@@ -1,0 +1,39 @@
+{
+  "quizId": "events-schema-fundamentals",
+  "topicId": "understanding-events-schema",
+  "attemptNumber": 1,
+  "startTime": "2024-01-20T14:00:00Z",
+  "endTime": "2024-01-20T14:07:00Z",
+  "score": 80,
+  "passed": true,
+  "answers": [
+    {
+      "questionId": "q1",
+      "answered": "B",
+      "correct": true
+    },
+    {
+      "questionId": "q2",
+      "answered": true,
+      "correct": true
+    },
+    {
+      "questionId": "q3",
+      "answered": "computed === signature",
+      "correct": true
+    },
+    {
+      "questionId": "q4",
+      "answered": "customer_email",
+      "correct": true
+    },
+    {
+      "questionId": "q5",
+      "answered": "A",
+      "correct": false,
+      "correctAnswer": "C"
+    }
+  ],
+  "timeSpentSeconds": 420,
+  "reviewedMissed": false
+}

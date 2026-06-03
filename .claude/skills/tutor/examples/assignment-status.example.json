@@ -1,0 +1,19 @@
+{
+  "assignmentId": "003",
+  "title": "Build a Customer Sync Handler",
+  "chapterId": "integration-starter-kit",
+  "assignedAt": "2024-01-20T10:00:00Z",
+  "status": "in-progress",
+  "hintsViewed": [1],
+  "filesSubmitted": [
+    "solution/actions/customer/commerce/created/transformer.js",
+    "solution/actions/customer/commerce/created/validator.js"
+  ],
+  "submittedAt": null,
+  "reviewedAt": null,
+  "score": null,
+  "attempts": 1,
+  "feedback": null,
+  "requiredChanges": [],
+  "optionalImprovements": []
+}

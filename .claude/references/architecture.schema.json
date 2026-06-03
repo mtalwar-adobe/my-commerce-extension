@@ -1,0 +1,730 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentskills.io/adobe-commerce/architecture.schema.json",
+  "title": "Adobe Commerce Extension Architecture",
+  "description": "Schema for ARCHITECTURE.md - the single source of truth for extension architecture decisions. Created by the Architect skill after REQUIREMENTS.md is approved. This schema defines the structure that all AI agents expect when reading or writing architecture documentation.",
+  "type": "object",
+  "required": [
+    "metadata",
+    "environment",
+    "integrationPoints",
+    "componentArchitecture",
+    "configurationImpact",
+    "securityArchitecture",
+    "dataFlow",
+    "decisionsLog"
+  ],
+  "properties": {
+    "metadata": {
+      "$ref": "#/$defs/documentMetadata"
+    },
+    "environment": {
+      "$ref": "#/$defs/environment"
+    },
+    "integrationPoints": {
+      "$ref": "#/$defs/integrationPoints"
+    },
+    "componentArchitecture": {
+      "$ref": "#/$defs/componentArchitecture"
+    },
+    "configurationImpact": {
+      "$ref": "#/$defs/configurationImpact"
+    },
+    "securityArchitecture": {
+      "$ref": "#/$defs/securityArchitecture"
+    },
+    "dataFlow": {
+      "$ref": "#/$defs/dataFlow"
+    },
+    "decisionsLog": {
+      "type": "array",
+      "description": "Architectural decisions with rationale (AD-1, AD-2, etc.)",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/architecturalDecision"
+      }
+    },
+    "performanceStrategy": {
+      "$ref": "#/$defs/performanceStrategy"
+    },
+    "errorHandlingStrategy": {
+      "$ref": "#/$defs/errorHandlingStrategy"
+    },
+    "testingStrategy": {
+      "$ref": "#/$defs/testingStrategy"
+    },
+    "approvals": {
+      "type": "array",
+      "description": "Required sign-offs for this document",
+      "items": {
+        "$ref": "#/$defs/approval"
+      }
+    },
+    "changelog": {
+      "type": "array",
+      "description": "Document revision history",
+      "items": {
+        "$ref": "#/$defs/changelogEntry"
+      }
+    }
+  },
+  "$defs": {
+    "documentMetadata": {
+      "type": "object",
+      "description": "Document control information",
+      "required": ["version", "status", "extensionName", "requirementsSource"],
+      "properties": {
+        "extensionName": {
+          "type": "string",
+          "description": "Name of the extension being architected"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+          "description": "Semantic version of this document (e.g., 1.0, 1.0.1)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "in-review", "approved", "in-development", "completed", "deprecated"],
+          "description": "Current document status"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of last update (YYYY-MM-DD)"
+        },
+        "architect": {
+          "type": "string",
+          "description": "Name of the architect responsible"
+        },
+        "requirementsSource": {
+          "type": "string",
+          "description": "Reference to the REQUIREMENTS.md version this architecture is based on (e.g., 'REQUIREMENTS.md v1.0')"
+        },
+        "approvalDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when architecture was approved"
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "description": "Target environment and technical stack",
+      "required": ["platform", "applicationType"],
+      "properties": {
+        "platform": {
+          "type": "string",
+          "enum": ["paas", "saas", "both"],
+          "description": "Adobe Commerce platform type"
+        },
+        "applicationType": {
+          "type": "string",
+          "enum": ["headless", "spa", "hybrid"],
+          "description": "Application type (headless for backend-only, spa for UI + backend)"
+        },
+        "commerceVersion": {
+          "type": "string",
+          "pattern": "^2\\.4\\.\\d+$",
+          "description": "Target Adobe Commerce version"
+        },
+        "runtime": {
+          "type": "string",
+          "description": "Runtime environment (e.g., 'Node.js 22')"
+        },
+        "additionalConstraints": {
+          "type": "array",
+          "description": "Environment-specific constraints from REQUIREMENTS.md",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "integrationPoints": {
+      "type": "object",
+      "description": "All integration points in the architecture",
+      "properties": {
+        "commerceEvents": {
+          "type": "array",
+          "description": "Commerce events that trigger actions (Commerce → External)",
+          "items": {
+            "$ref": "#/$defs/commerceEvent"
+          }
+        },
+        "backofficeEvents": {
+          "type": "array",
+          "description": "Backoffice events from external systems (External → Commerce)",
+          "items": {
+            "$ref": "#/$defs/backofficeEvent"
+          }
+        },
+        "externalSystems": {
+          "type": "array",
+          "description": "External systems being integrated",
+          "items": {
+            "$ref": "#/$defs/externalSystem"
+          }
+        }
+      }
+    },
+    "commerceEvent": {
+      "type": "object",
+      "description": "A Commerce event that triggers an action",
+      "required": ["eventName", "eventType", "actionPath"],
+      "properties": {
+        "eventName": {
+          "type": "string",
+          "description": "Full event name (e.g., 'sales_order_save_commit_after')"
+        },
+        "eventType": {
+          "type": "string",
+          "enum": ["observer", "plugin"],
+          "description": "Event type prefix for subscription"
+        },
+        "trigger": {
+          "type": "string",
+          "description": "Human-readable description of what triggers this event"
+        },
+        "payloadFields": {
+          "type": "array",
+          "description": "Fields from EVENTS_SCHEMA.json needed for this integration",
+          "items": {
+            "type": "object",
+            "required": ["field", "type"],
+            "properties": {
+              "field": { "type": "string" },
+              "type": { "type": "string", "description": "Data type from schema (string, int, float, bool, array, object{})" },
+              "purpose": { "type": "string" }
+            }
+          }
+        },
+        "actionPath": {
+          "type": "string",
+          "description": "Action directory path (e.g., 'actions/order/commerce/created/')"
+        },
+        "conditions": {
+          "type": "array",
+          "description": "Conditions for processing (e.g., 'only when _isNew is true')",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "backofficeEvent": {
+      "type": "object",
+      "description": "A backoffice event from an external system",
+      "required": ["eventName", "actionPath"],
+      "properties": {
+        "eventName": {
+          "type": "string",
+          "description": "Backoffice event name"
+        },
+        "trigger": {
+          "type": "string",
+          "description": "What triggers this event in the external system"
+        },
+        "actionPath": {
+          "type": "string",
+          "description": "Action directory path"
+        },
+        "dataMapping": {
+          "type": "string",
+          "description": "How external data maps to Commerce entities"
+        }
+      }
+    },
+    "externalSystem": {
+      "type": "object",
+      "description": "An external system in the integration",
+      "required": ["name", "apiType", "authentication", "dataFlow"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "System name"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["crm", "erp", "warehouse", "marketing", "payment", "shipping", "analytics", "pim", "custom"],
+          "description": "Type of external system"
+        },
+        "apiType": {
+          "type": "string",
+          "enum": ["rest", "graphql", "soap", "webhook", "ftp", "sftp", "other"],
+          "description": "API communication protocol"
+        },
+        "authentication": {
+          "type": "string",
+          "enum": ["api-key", "oauth2", "basic-auth", "certificate", "jwt", "none"],
+          "description": "Authentication method"
+        },
+        "baseUrl": {
+          "type": "string",
+          "description": "Base API URL or environment variable reference"
+        },
+        "dataFlow": {
+          "type": "string",
+          "enum": ["outbound", "inbound", "bidirectional"],
+          "description": "Direction of data flow relative to Commerce"
+        },
+        "rateLimits": {
+          "type": "string",
+          "description": "API rate limiting constraints"
+        }
+      }
+    },
+    "componentArchitecture": {
+      "type": "object",
+      "description": "Architecture components: actions, state, scheduled tasks",
+      "required": ["runtimeActions"],
+      "properties": {
+        "runtimeActions": {
+          "type": "array",
+          "description": "All runtime actions in the extension",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/runtimeAction"
+          }
+        },
+        "stateManagement": {
+          "type": "array",
+          "description": "State storage patterns used",
+          "items": {
+            "$ref": "#/$defs/stateEntry"
+          }
+        },
+        "fileStorage": {
+          "type": "array",
+          "description": "File storage patterns used",
+          "items": {
+            "$ref": "#/$defs/fileEntry"
+          }
+        },
+        "scheduledActions": {
+          "type": "array",
+          "description": "Scheduled/cron actions",
+          "items": {
+            "$ref": "#/$defs/scheduledAction"
+          }
+        }
+      }
+    },
+    "runtimeAction": {
+      "type": "object",
+      "description": "A single runtime action following the 6-file pattern",
+      "required": ["name", "path", "purpose", "trigger"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Action identifier (e.g., 'order-created')"
+        },
+        "path": {
+          "type": "string",
+          "description": "Directory path (e.g., 'actions/order/commerce/created/')"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "What this action does"
+        },
+        "trigger": {
+          "type": "string",
+          "description": "Event or schedule that triggers this action"
+        },
+        "files": {
+          "type": "object",
+          "description": "Details for each of the 6 required files",
+          "properties": {
+            "validator": { "type": "string", "description": "Validation logic summary" },
+            "transformer": { "type": "string", "description": "Transformation logic summary" },
+            "pre": { "type": "string", "description": "Pre-processing logic summary" },
+            "sender": { "type": "string", "description": "External API call summary" },
+            "post": { "type": "string", "description": "Post-processing logic summary" }
+          }
+        },
+        "runtimeConfig": {
+          "type": "object",
+          "description": "Runtime action configuration",
+          "properties": {
+            "runtime": { "type": "string", "description": "Runtime version (e.g., 'nodejs:22')" },
+            "web": { "type": "string", "enum": ["yes", "no", "raw"], "description": "Web accessibility" },
+            "timeout": { "type": "integer", "description": "Timeout in milliseconds" },
+            "memory": { "type": "integer", "description": "Memory limit in MB" },
+            "concurrency": { "type": "integer", "description": "Max concurrent invocations" }
+          }
+        }
+      }
+    },
+    "stateEntry": {
+      "type": "object",
+      "description": "A state storage entry",
+      "required": ["keyPattern", "purpose"],
+      "properties": {
+        "keyPattern": {
+          "type": "string",
+          "description": "Key naming pattern (e.g., 'order-sync-{incrementId}')"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Why this state is stored"
+        },
+        "dataShape": {
+          "type": "string",
+          "description": "Shape of stored data"
+        },
+        "ttl": {
+          "type": "string",
+          "description": "Time-to-live (e.g., '86400' for 1 day)"
+        },
+        "estimatedSize": {
+          "type": "string",
+          "description": "Estimated data size per entry"
+        }
+      }
+    },
+    "fileEntry": {
+      "type": "object",
+      "description": "A file storage entry",
+      "required": ["pathPattern", "purpose"],
+      "properties": {
+        "pathPattern": {
+          "type": "string",
+          "description": "File path pattern (e.g., 'exports/orders-{date}.csv')"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Why this file is stored"
+        },
+        "format": {
+          "type": "string",
+          "description": "File format (csv, json, pdf, etc.)"
+        },
+        "retentionPolicy": {
+          "type": "string",
+          "description": "How long files are retained"
+        }
+      }
+    },
+    "scheduledAction": {
+      "type": "object",
+      "description": "A scheduled/cron action",
+      "required": ["name", "schedule", "purpose"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Action name"
+        },
+        "schedule": {
+          "type": "string",
+          "description": "Cron expression"
+        },
+        "scheduleHumanReadable": {
+          "type": "string",
+          "description": "Human-readable schedule"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "What this scheduled action does"
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "Max execution time in milliseconds"
+        }
+      }
+    },
+    "configurationImpact": {
+      "type": "object",
+      "description": "Configuration files to create or update",
+      "properties": {
+        "filesToUpdate": {
+          "type": "array",
+          "description": "Files that need to be created or modified",
+          "items": {
+            "type": "object",
+            "required": ["file", "action", "details"],
+            "properties": {
+              "file": {
+                "type": "string",
+                "description": "File path (e.g., 'commerce-event-subscribe.json')"
+              },
+              "action": {
+                "type": "string",
+                "enum": ["create", "update", "verify"],
+                "description": "What action is needed"
+              },
+              "details": {
+                "type": "string",
+                "description": "Specific changes to make"
+              }
+            }
+          }
+        },
+        "environmentVariables": {
+          "type": "array",
+          "description": "Required environment variables",
+          "items": {
+            "type": "object",
+            "required": ["name", "purpose"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Variable name (e.g., 'EXTERNAL_API_URL')"
+              },
+              "purpose": {
+                "type": "string",
+                "description": "What this variable is used for"
+              },
+              "example": {
+                "type": "string",
+                "description": "Example value"
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Whether this variable is required"
+              }
+            }
+          }
+        },
+        "npmDependencies": {
+          "type": "array",
+          "description": "NPM packages needed",
+          "items": {
+            "type": "object",
+            "properties": {
+              "package": { "type": "string" },
+              "purpose": { "type": "string" },
+              "version": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "securityArchitecture": {
+      "type": "object",
+      "description": "Security design for the extension",
+      "required": ["authentication", "eventValidation"],
+      "properties": {
+        "authentication": {
+          "type": "object",
+          "description": "Authentication approach",
+          "required": ["method"],
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": ["ims-oauth2-s2s", "ims-oauth2-pkce", "oauth1.0a", "api-key", "certificate"],
+              "description": "Primary authentication method"
+            },
+            "pattern": {
+              "type": "string",
+              "description": "Authentication pattern description"
+            },
+            "credentials": {
+              "type": "array",
+              "description": "Required credentials (as env var names, NOT actual values)",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "eventValidation": {
+          "type": "object",
+          "description": "Event validation requirements",
+          "properties": {
+            "signatureVerification": { "type": "boolean", "description": "HMAC-SHA256 signature check" },
+            "timestampValidation": { "type": "boolean", "description": "Timestamp window check" },
+            "eventTypeWhitelist": {
+              "type": "array",
+              "description": "Allowed event types",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "secretsManagement": {
+          "type": "object",
+          "description": "How secrets are managed",
+          "properties": {
+            "localDev": { "type": "string", "description": "How secrets stored locally (e.g., '.env file')" },
+            "production": { "type": "string", "description": "How secrets stored in prod (e.g., 'GitHub Secrets')" }
+          }
+        },
+        "dataProtection": {
+          "type": "array",
+          "description": "Data protection measures",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "dataFlow": {
+      "type": "object",
+      "description": "Data flow visualization and description",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "High-level data flow narrative"
+        },
+        "mermaidDiagram": {
+          "type": "string",
+          "description": "Mermaid diagram code for the data flow"
+        },
+        "transformations": {
+          "type": "array",
+          "description": "Key data transformations",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string", "description": "Source format/entity" },
+              "to": { "type": "string", "description": "Target format/entity" },
+              "description": { "type": "string", "description": "What the transformation does" },
+              "fieldMappings": {
+                "type": "array",
+                "description": "Key field mappings",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "sourceField": { "type": "string" },
+                    "targetField": { "type": "string" },
+                    "transformation": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "performanceStrategy": {
+      "type": "object",
+      "description": "Performance optimization strategy (optional)",
+      "properties": {
+        "caching": {
+          "type": "array",
+          "description": "Caching patterns",
+          "items": {
+            "type": "object",
+            "properties": {
+              "data": { "type": "string" },
+              "storage": { "type": "string", "enum": ["state", "files"] },
+              "ttl": { "type": "string" },
+              "invalidation": { "type": "string" }
+            }
+          }
+        },
+        "batching": {
+          "type": "string",
+          "description": "Batch processing strategy if applicable"
+        },
+        "scalingConsiderations": {
+          "type": "array",
+          "description": "Scalability design notes",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "errorHandlingStrategy": {
+      "type": "object",
+      "description": "Error handling and resilience strategy (optional)",
+      "properties": {
+        "retryPolicy": {
+          "type": "object",
+          "properties": {
+            "maxRetries": { "type": "integer" },
+            "backoffType": { "type": "string", "enum": ["exponential", "fixed", "linear"] },
+            "initialDelay": { "type": "string" }
+          }
+        },
+        "failureScenarios": {
+          "type": "array",
+          "description": "Key failure scenarios and handling",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scenario": { "type": "string" },
+              "handling": { "type": "string" },
+              "alerting": { "type": "string" }
+            }
+          }
+        },
+        "idempotencyStrategy": {
+          "type": "string",
+          "description": "How duplicate events are handled"
+        }
+      }
+    },
+    "testingStrategy": {
+      "type": "object",
+      "description": "Testing recommendations for Tester skill (optional)",
+      "properties": {
+        "unitTestFocus": {
+          "type": "array",
+          "description": "Components that need unit tests",
+          "items": { "type": "string" }
+        },
+        "integrationTestScenarios": {
+          "type": "array",
+          "description": "End-to-end scenarios to test",
+          "items": { "type": "string" }
+        },
+        "mockRequirements": {
+          "type": "array",
+          "description": "External APIs and services that need mocking",
+          "items": { "type": "string" }
+        },
+        "coverageTarget": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Target code coverage percentage"
+        }
+      }
+    },
+    "architecturalDecision": {
+      "type": "object",
+      "description": "A recorded architectural decision",
+      "required": ["id", "decision", "rationale"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^AD-\\d+$",
+          "description": "Unique identifier (AD-1, AD-2, etc.)"
+        },
+        "decision": {
+          "type": "string",
+          "description": "The decision made"
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Why this decision was made"
+        },
+        "alternativesConsidered": {
+          "type": "array",
+          "description": "Other options that were evaluated",
+          "items": { "type": "string" }
+        },
+        "tradeoffs": {
+          "type": "string",
+          "description": "Trade-offs of the chosen approach"
+        },
+        "relatedRequirement": {
+          "type": "string",
+          "description": "Related FR-N or BR-N from REQUIREMENTS.md"
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "role": { "type": "string" },
+        "name": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "signature": { "type": "string" }
+      }
+    },
+    "changelogEntry": {
+      "type": "object",
+      "required": ["version", "date", "author", "changes"],
+      "properties": {
+        "version": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "author": { "type": "string" },
+        "changes": { "type": "string" }
+      }
+    }
+  }
+}

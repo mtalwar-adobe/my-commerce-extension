@@ -1,0 +1,928 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentskills.io/adobe-commerce/requirements.schema.json",
+  "title": "Adobe Commerce Extension Requirements",
+  "description": "Schema for REQUIREMENTS.md - the single source of truth for extension requirements. This schema defines the structure that all AI agents expect when reading or writing requirements documentation.",
+  "type": "object",
+  "required": [
+    "metadata",
+    "summary",
+    "technicalContext",
+    "functionalRequirements",
+    "acceptanceCriteria"
+  ],
+  "properties": {
+    "metadata": {
+      "$ref": "#/$defs/documentMetadata"
+    },
+    "summary": {
+      "$ref": "#/$defs/executiveSummary"
+    },
+    "technicalContext": {
+      "$ref": "#/$defs/technicalContext"
+    },
+    "integrations": {
+      "type": "array",
+      "description": "External systems this extension integrates with",
+      "items": {
+        "$ref": "#/$defs/integration"
+      }
+    },
+    "functionalRequirements": {
+      "type": "array",
+      "description": "List of functional requirements (FR-1, FR-2, etc.)",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/functionalRequirement"
+      }
+    },
+    "businessRules": {
+      "type": "array",
+      "description": "Business rules that govern extension behavior (BR-1, BR-2, etc.)",
+      "items": {
+        "$ref": "#/$defs/businessRule"
+      }
+    },
+    "dataRequirements": {
+      "$ref": "#/$defs/dataRequirements"
+    },
+    "nonFunctionalRequirements": {
+      "$ref": "#/$defs/nonFunctionalRequirements"
+    },
+    "stateManagement": {
+      "$ref": "#/$defs/stateManagement"
+    },
+    "scheduledOperations": {
+      "type": "array",
+      "description": "Time-based or scheduled operations",
+      "items": {
+        "$ref": "#/$defs/scheduledOperation"
+      }
+    },
+    "errorHandling": {
+      "$ref": "#/$defs/errorHandling"
+    },
+    "userExperience": {
+      "$ref": "#/$defs/userExperience"
+    },
+    "testingRequirements": {
+      "$ref": "#/$defs/testingRequirements"
+    },
+    "dependencies": {
+      "$ref": "#/$defs/dependencies"
+    },
+    "risks": {
+      "type": "array",
+      "description": "Identified risks and mitigation strategies",
+      "items": {
+        "$ref": "#/$defs/risk"
+      }
+    },
+    "timeline": {
+      "$ref": "#/$defs/timeline"
+    },
+    "acceptanceCriteria": {
+      "$ref": "#/$defs/acceptanceCriteria"
+    },
+    "approvals": {
+      "type": "array",
+      "description": "Required sign-offs for this document",
+      "items": {
+        "$ref": "#/$defs/approval"
+      }
+    },
+    "changelog": {
+      "type": "array",
+      "description": "Document revision history",
+      "items": {
+        "$ref": "#/$defs/changelogEntry"
+      }
+    },
+    "glossary": {
+      "type": "object",
+      "description": "Key terms and definitions",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "documentMetadata": {
+      "type": "object",
+      "description": "Document control information",
+      "required": ["version", "status", "extensionName"],
+      "properties": {
+        "extensionName": {
+          "type": "string",
+          "description": "Name of the extension being documented"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+          "description": "Semantic version of this document (e.g., 1.0, 1.0.1)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "in-review", "approved", "in-development", "completed", "deprecated"],
+          "description": "Current document status"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of last update (YYYY-MM-DD)"
+        },
+        "productManager": {
+          "type": "string",
+          "description": "Name of the product manager responsible"
+        },
+        "stakeholders": {
+          "type": "array",
+          "description": "List of key stakeholders",
+          "items": {
+            "type": "string"
+          }
+        },
+        "approvalDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when requirements were approved"
+        }
+      }
+    },
+    "executiveSummary": {
+      "type": "object",
+      "description": "High-level overview of the extension",
+      "required": ["businessObjective", "priority"],
+      "properties": {
+        "businessObjective": {
+          "type": "string",
+          "description": "2-3 sentence summary of what this extension does and why"
+        },
+        "problemStatement": {
+          "type": "string",
+          "description": "The business problem this extension solves"
+        },
+        "proposedSolution": {
+          "type": "string",
+          "description": "High-level description of the solution"
+        },
+        "expectedImpact": {
+          "type": "array",
+          "description": "Expected business impact metrics",
+          "items": {
+            "type": "object",
+            "properties": {
+              "metric": { "type": "string" },
+              "expectedImprovement": { "type": "string" }
+            }
+          }
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"],
+          "description": "Business priority level"
+        },
+        "priorityJustification": {
+          "type": "string",
+          "description": "Why this priority level was assigned"
+        },
+        "successCriteria": {
+          "type": "array",
+          "description": "Measurable criteria for project success",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kpis": {
+          "type": "array",
+          "description": "Key performance indicators",
+          "items": {
+            "type": "object",
+            "properties": {
+              "metric": { "type": "string" },
+              "currentState": { "type": "string" },
+              "target": { "type": "string" },
+              "measurementMethod": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "technicalContext": {
+      "type": "object",
+      "description": "Technical environment and constraints",
+      "required": ["platform"],
+      "properties": {
+        "platform": {
+          "type": "string",
+          "enum": ["paas", "saas", "both"],
+          "description": "Adobe Commerce platform type (CRITICAL for implementation)"
+        },
+        "commerceVersion": {
+          "type": "string",
+          "pattern": "^2\\.4\\.\\d+$",
+          "description": "Target Adobe Commerce version (e.g., 2.4.7)"
+        },
+        "applicationType": {
+          "type": "string",
+          "enum": ["headless", "spa", "hybrid", "traditional"],
+          "description": "Frontend application type"
+        },
+        "constraints": {
+          "type": "array",
+          "description": "Technical or business constraints",
+          "items": {
+            "type": "string"
+          }
+        },
+        "complianceRequirements": {
+          "type": "array",
+          "description": "Regulatory compliance requirements",
+          "items": {
+            "type": "string",
+            "enum": ["gdpr", "pci-dss", "hipaa", "soc2", "ccpa", "other"]
+          }
+        }
+      }
+    },
+    "integration": {
+      "type": "object",
+      "description": "External system integration details",
+      "required": ["name", "type", "purpose"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the external system"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["crm", "erp", "warehouse", "marketing", "payment", "shipping", "analytics", "pim", "custom"],
+          "description": "Type of external system"
+        },
+        "vendor": {
+          "type": "string",
+          "description": "Vendor/platform name (e.g., Salesforce, SAP, NetSuite)"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Why integrating with this system"
+        },
+        "apiDetails": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["rest", "graphql", "soap", "webhook", "ftp", "sftp", "other"]
+            },
+            "authentication": {
+              "type": "string",
+              "enum": ["api-key", "oauth2", "basic-auth", "certificate", "jwt", "none"]
+            },
+            "baseUrl": { "type": "string", "format": "uri" },
+            "documentationUrl": { "type": "string", "format": "uri" },
+            "rateLimits": { "type": "string" },
+            "timeout": { "type": "string" }
+          }
+        },
+        "environments": {
+          "type": "object",
+          "properties": {
+            "sandbox": { "type": "string", "format": "uri" },
+            "staging": { "type": "string", "format": "uri" },
+            "production": { "type": "string", "format": "uri" }
+          }
+        },
+        "dataFlowOutbound": {
+          "type": "object",
+          "description": "Data flowing from Commerce to external system",
+          "properties": {
+            "trigger": { "type": "string" },
+            "data": { "type": "array", "items": { "type": "string" } },
+            "frequency": {
+              "type": "string",
+              "enum": ["real-time", "batch", "scheduled"]
+            }
+          }
+        },
+        "dataFlowInbound": {
+          "type": "object",
+          "description": "Data flowing from external system to Commerce",
+          "properties": {
+            "trigger": { "type": "string" },
+            "data": { "type": "array", "items": { "type": "string" } },
+            "frequency": {
+              "type": "string",
+              "enum": ["real-time", "batch", "scheduled"]
+            }
+          }
+        },
+        "samplePayloads": {
+          "type": "object",
+          "properties": {
+            "outbound": { "type": "object" },
+            "inbound": { "type": "object" }
+          }
+        }
+      }
+    },
+    "functionalRequirement": {
+      "type": "object",
+      "description": "A single functional requirement",
+      "required": ["id", "name", "description", "acceptanceCriteria"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^FR-\\d+$",
+          "description": "Unique identifier (FR-1, FR-2, etc.)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Short descriptive name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of what should happen"
+        },
+        "userStory": {
+          "type": "string",
+          "description": "As a [role], I want to [action] so that [benefit]"
+        },
+        "trigger": {
+          "type": "object",
+          "description": "What triggers this requirement",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["commerce-event", "backoffice-event", "scheduled", "manual", "api-call"]
+            },
+            "eventName": { "type": "string" },
+            "conditions": { "type": "array", "items": { "type": "string" } },
+            "frequency": { "type": "string" }
+          }
+        },
+        "requiredData": {
+          "type": "array",
+          "description": "Data fields required from Commerce (reference EVENTS_SCHEMA.json)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field": { "type": "string" },
+              "type": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "businessLogic": {
+          "type": "array",
+          "description": "Step-by-step business logic",
+          "items": { "type": "string" }
+        },
+        "acceptanceCriteria": {
+          "type": "array",
+          "description": "Given/When/Then acceptance criteria",
+          "items": {
+            "type": "object",
+            "required": ["given", "when", "then"],
+            "properties": {
+              "given": { "type": "string" },
+              "when": { "type": "string" },
+              "then": { "type": "string" }
+            }
+          }
+        },
+        "validationRules": {
+          "type": "array",
+          "description": "Data validation rules",
+          "items": { "type": "string" }
+        },
+        "errorScenarios": {
+          "type": "array",
+          "description": "Error scenarios and expected behavior",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scenario": { "type": "string" },
+              "expectedBehavior": { "type": "string" }
+            }
+          }
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["must-have", "should-have", "could-have", "wont-have"],
+          "description": "MoSCoW priority"
+        }
+      }
+    },
+    "businessRule": {
+      "type": "object",
+      "description": "A business rule governing extension behavior",
+      "required": ["id", "rule"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^BR-\\d+$",
+          "description": "Unique identifier (BR-1, BR-2, etc.)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Short descriptive name"
+        },
+        "rule": {
+          "type": "string",
+          "description": "Clear statement of the rule"
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Why this rule exists"
+        },
+        "examples": {
+          "type": "array",
+          "description": "Example scenarios",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": { "type": "string" },
+              "action": { "type": "string" }
+            }
+          }
+        },
+        "exceptions": {
+          "type": "array",
+          "description": "Exceptions to this rule",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "dataRequirements": {
+      "type": "object",
+      "description": "Data mapping and validation requirements",
+      "properties": {
+        "mappingsOutbound": {
+          "type": "array",
+          "description": "Field mappings from Commerce to external systems",
+          "items": {
+            "$ref": "#/$defs/fieldMapping"
+          }
+        },
+        "mappingsInbound": {
+          "type": "array",
+          "description": "Field mappings from external systems to Commerce",
+          "items": {
+            "$ref": "#/$defs/fieldMapping"
+          }
+        },
+        "validationRules": {
+          "type": "object",
+          "properties": {
+            "requiredFields": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": { "type": "string" },
+                  "rule": { "type": "string" }
+                }
+              }
+            },
+            "optionalFields": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": { "type": "string" },
+                  "defaultValue": { "type": "string" }
+                }
+              }
+            },
+            "formatRequirements": {
+              "type": "object",
+              "description": "Format requirements for common field types",
+              "properties": {
+                "email": { "type": "string" },
+                "phone": { "type": "string" },
+                "currency": { "type": "string" },
+                "dateTime": { "type": "string" }
+              }
+            }
+          }
+        },
+        "piiFields": {
+          "type": "array",
+          "description": "Fields containing personally identifiable information",
+          "items": { "type": "string" }
+        },
+        "dataRetentionPolicy": {
+          "type": "string",
+          "description": "How long data should be retained"
+        },
+        "dataResidency": {
+          "type": "string",
+          "description": "Geographic restrictions on data storage"
+        }
+      }
+    },
+    "fieldMapping": {
+      "type": "object",
+      "required": ["sourceField", "targetField"],
+      "properties": {
+        "sourceField": { "type": "string" },
+        "sourceType": { "type": "string" },
+        "targetField": { "type": "string" },
+        "targetType": { "type": "string" },
+        "transformation": { "type": "string" }
+      }
+    },
+    "nonFunctionalRequirements": {
+      "type": "object",
+      "description": "Performance, availability, security, and scalability requirements",
+      "properties": {
+        "performance": {
+          "type": "object",
+          "properties": {
+            "responseTime": { "type": "string" },
+            "throughput": { "type": "string" },
+            "dataVolume": { "type": "string" },
+            "concurrentUsers": { "type": "integer" }
+          }
+        },
+        "availability": {
+          "type": "object",
+          "properties": {
+            "uptimeTarget": { "type": "string" },
+            "maintenanceWindow": { "type": "string" },
+            "rto": { "type": "string", "description": "Recovery Time Objective" },
+            "rpo": { "type": "string", "description": "Recovery Point Objective" }
+          }
+        },
+        "security": {
+          "type": "object",
+          "properties": {
+            "signatureValidation": { "type": "boolean" },
+            "timestampValidation": { "type": "boolean" },
+            "encryptionInTransit": { "type": "boolean" },
+            "encryptionAtRest": { "type": "boolean" },
+            "auditLogging": { "type": "boolean" },
+            "rateLimiting": { "type": "boolean" }
+          }
+        },
+        "scalability": {
+          "type": "object",
+          "properties": {
+            "expectedGrowth": { "type": "string" },
+            "peakLoadScenarios": { "type": "array", "items": { "type": "string" } },
+            "autoScaling": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "stateManagement": {
+      "type": "object",
+      "description": "Data persistence and idempotency requirements",
+      "properties": {
+        "dataToPersist": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "data": { "type": "string" },
+              "purpose": { "type": "string" },
+              "storageType": { "type": "string", "enum": ["state", "files"] },
+              "ttl": { "type": "string" },
+              "estimatedSize": { "type": "string" }
+            }
+          }
+        },
+        "idempotencyStrategy": {
+          "type": "string",
+          "description": "How to prevent duplicate processing"
+        },
+        "duplicateDetection": {
+          "type": "array",
+          "description": "Methods to detect duplicate events",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "scheduledOperation": {
+      "type": "object",
+      "description": "A scheduled/time-based operation",
+      "required": ["name", "schedule"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "schedule": {
+          "type": "string",
+          "description": "Cron expression"
+        },
+        "scheduleHumanReadable": {
+          "type": "string",
+          "description": "Human-readable schedule (e.g., 'Daily at 2 AM UTC')"
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "operations": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "timeout": {
+          "type": "string"
+        },
+        "failureHandling": {
+          "type": "string"
+        }
+      }
+    },
+    "errorHandling": {
+      "type": "object",
+      "description": "Error handling strategy and edge cases",
+      "properties": {
+        "strategies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scenario": { "type": "string" },
+              "detection": { "type": "string" },
+              "action": { "type": "string" },
+              "retryPolicy": {
+                "type": "object",
+                "properties": {
+                  "maxRetries": { "type": "integer" },
+                  "backoffType": { "type": "string", "enum": ["exponential", "fixed", "linear"] },
+                  "initialDelay": { "type": "string" }
+                }
+              },
+              "alerting": { "type": "string" }
+            }
+          }
+        },
+        "edgeCases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scenario": { "type": "string" },
+              "description": { "type": "string" },
+              "likelihood": { "type": "string", "enum": ["high", "medium", "low"] },
+              "impact": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+              "handling": { "type": "string" }
+            }
+          }
+        },
+        "conflictResolution": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scenario": { "type": "string" },
+              "strategy": { "type": "string", "enum": ["last-write-wins", "merge", "source-priority", "manual-review"] },
+              "implementation": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "userExperience": {
+      "type": "object",
+      "description": "Admin UI and notification requirements",
+      "properties": {
+        "adminInterface": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" },
+            "features": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "permissions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "feature": { "type": "string" },
+                  "roles": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "event": { "type": "string" },
+              "channel": { "type": "string", "enum": ["email", "sms", "admin-ui", "slack", "webhook"] },
+              "recipients": { "type": "array", "items": { "type": "string" } },
+              "frequency": { "type": "string" }
+            }
+          }
+        },
+        "debugging": {
+          "type": "object",
+          "properties": {
+            "loggingRequired": { "type": "array", "items": { "type": "string" } },
+            "debugMode": { "type": "boolean" },
+            "metricsToTrack": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "testingRequirements": {
+      "type": "object",
+      "description": "Testing coverage and scenarios",
+      "properties": {
+        "coverageRequirements": {
+          "type": "object",
+          "properties": {
+            "unit": { "type": "boolean" },
+            "integration": { "type": "boolean" },
+            "e2e": { "type": "boolean" },
+            "performance": { "type": "boolean" },
+            "security": { "type": "boolean" },
+            "uat": { "type": "boolean" },
+            "minimumCoverage": { "type": "integer", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "scenarios": {
+          "type": "object",
+          "properties": {
+            "happyPath": { "type": "array", "items": { "type": "string" } },
+            "errorPath": { "type": "array", "items": { "type": "string" } },
+            "edgeCases": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "testData": {
+          "type": "object",
+          "properties": {
+            "commerceTestEnvironment": { "type": "boolean" },
+            "externalSystemSandbox": { "type": "boolean" },
+            "sampleValidPayloads": { "type": "boolean" },
+            "sampleInvalidPayloads": { "type": "boolean" },
+            "largePayloadSamples": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "description": "Prerequisites and external dependencies",
+      "properties": {
+        "prerequisites": {
+          "type": "array",
+          "description": "What needs to be in place before development",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item": { "type": "string" },
+              "status": { "type": "string", "enum": ["pending", "in-progress", "completed"] },
+              "owner": { "type": "string" }
+            }
+          }
+        },
+        "externalDependencies": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "assumptions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "required": ["description", "likelihood", "impact"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^RISK-\\d+$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "likelihood": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "impact": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        },
+        "mitigationStrategy": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        }
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "description": "Project timeline and milestones",
+      "properties": {
+        "targetStart": {
+          "type": "string",
+          "format": "date"
+        },
+        "targetCompletion": {
+          "type": "string",
+          "format": "date"
+        },
+        "productionDeployment": {
+          "type": "string",
+          "format": "date"
+        },
+        "milestones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "targetDate": { "type": "string", "format": "date" },
+              "status": { "type": "string", "enum": ["pending", "in-progress", "completed", "delayed"] }
+            }
+          }
+        },
+        "criticalPath": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "acceptanceCriteria": {
+      "type": "object",
+      "description": "Master acceptance criteria checklist",
+      "properties": {
+        "functional": {
+          "type": "array",
+          "description": "Functional acceptance criteria",
+          "items": {
+            "type": "object",
+            "properties": {
+              "criterion": { "type": "string" },
+              "verified": { "type": "boolean" }
+            }
+          }
+        },
+        "technical": {
+          "type": "array",
+          "description": "Technical acceptance criteria",
+          "items": {
+            "type": "object",
+            "properties": {
+              "criterion": { "type": "string" },
+              "verified": { "type": "boolean" }
+            }
+          }
+        },
+        "documentation": {
+          "type": "array",
+          "description": "Documentation acceptance criteria",
+          "items": {
+            "type": "object",
+            "properties": {
+              "criterion": { "type": "string" },
+              "verified": { "type": "boolean" }
+            }
+          }
+        },
+        "operational": {
+          "type": "array",
+          "description": "Operational acceptance criteria",
+          "items": {
+            "type": "object",
+            "properties": {
+              "criterion": { "type": "string" },
+              "verified": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "role": { "type": "string" },
+        "name": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "signature": { "type": "string" }
+      }
+    },
+    "changelogEntry": {
+      "type": "object",
+      "required": ["version", "date", "author", "changes"],
+      "properties": {
+        "version": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "author": { "type": "string" },
+        "changes": { "type": "string" }
+      }
+    }
+  }
+}

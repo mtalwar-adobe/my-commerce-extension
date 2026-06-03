@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentskills.io/adobe-commerce/tutor/assignment-status.schema.json",
+  "title": "Assignment Status",
+  "description": "Tracks the status and progress of a coding assignment.",
+  "type": "object",
+  "required": ["assignmentId", "title", "assignedAt", "status"],
+  "properties": {
+    "assignmentId": {
+      "type": "string",
+      "description": "Unique identifier for the assignment (e.g., '001', '002')"
+    },
+    "title": {
+      "type": "string",
+      "description": "Display title of the assignment"
+    },
+    "chapterId": {
+      "type": "string",
+      "description": "ID of the chapter this assignment belongs to"
+    },
+    "topicId": {
+      "type": "string",
+      "description": "ID of the topic this assignment is associated with"
+    },
+    "assignedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the assignment was given"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["not-started", "in-progress", "submitted", "needs-revision", "completed"],
+      "description": "Current status of the assignment"
+    },
+    "hintsViewed": {
+      "type": "array",
+      "description": "List of hint numbers the learner has viewed",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "uniqueItems": true
+    },
+    "filesSubmitted": {
+      "type": "array",
+      "description": "Relative paths of files submitted for review",
+      "items": {
+        "type": "string"
+      }
+    },
+    "submittedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the assignment was submitted for review"
+    },
+    "reviewedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the tutor reviewed the submission"
+    },
+    "score": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Score given after review (0-100)"
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "Number of submission attempts"
+    },
+    "feedback": {
+      "type": "string",
+      "description": "Filename of the feedback markdown file"
+    },
+    "requiredChanges": {
+      "type": "array",
+      "description": "List of changes required before approval",
+      "items": {
+        "type": "string"
+      }
+    },
+    "optionalImprovements": {
+      "type": "array",
+      "description": "Suggested improvements (not required for completion)",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

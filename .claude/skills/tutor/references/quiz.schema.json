@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentskills.io/adobe-commerce/tutor/quiz.schema.json",
+  "title": "Quiz Result",
+  "description": "Records the results of a completed quiz attempt including answers and scoring.",
+  "type": "object",
+  "required": ["quizId", "startTime", "score", "answers"],
+  "properties": {
+    "quizId": {
+      "type": "string",
+      "description": "Unique identifier for the quiz"
+    },
+    "topicId": {
+      "type": "string",
+      "description": "ID of the topic this quiz is associated with"
+    },
+    "chapterId": {
+      "type": "string",
+      "description": "ID of the chapter this quiz is associated with (for chapter quizzes)"
+    },
+    "attemptNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Which attempt this is (1 = first attempt)"
+    },
+    "startTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the quiz started"
+    },
+    "endTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the quiz was submitted"
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Final score as a percentage (0-100)"
+    },
+    "passed": {
+      "type": "boolean",
+      "description": "Whether the learner passed (typically >= 70%)"
+    },
+    "answers": {
+      "type": "array",
+      "description": "Individual question answers and results",
+      "items": { "$ref": "#/$defs/answer" }
+    },
+    "timeSpentSeconds": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total time spent on the quiz in seconds"
+    },
+    "reviewedMissed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the learner reviewed missed questions"
+    }
+  },
+  "$defs": {
+    "answer": {
+      "type": "object",
+      "required": ["questionId", "correct"],
+      "properties": {
+        "questionId": {
+          "type": "string",
+          "description": "ID of the question answered"
+        },
+        "answered": {
+          "description": "The learner's answer (string, boolean, or other depending on question type)"
+        },
+        "correct": {
+          "type": "boolean",
+          "description": "Whether the answer was correct"
+        },
+        "correctAnswer": {
+          "description": "The correct answer (included only for incorrect responses)"
+        },
+        "timeSpentSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Time spent on this question in seconds"
+        }
+      }
+    },
+    "questionType": {
+      "type": "string",
+      "enum": ["multiple-choice", "true-false", "code-completion", "debug"],
+      "description": "Type of quiz question"
+    }
+  }
+}

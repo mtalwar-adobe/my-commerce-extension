@@ -1,0 +1,67 @@
+{
+  "generatedFor": "Developer Name",
+  "generatedAt": "2024-01-15T10:30:00Z",
+  "estimatedTotalHours": 40,
+  "chapters": [
+    {
+      "id": "foundation-concepts",
+      "title": "Chapter 1: Foundation Concepts",
+      "description": "Understanding Adobe Commerce ecosystem and App Builder fundamentals",
+      "estimatedHours": 4,
+      "topics": [
+        {
+          "id": "what-is-adobe-commerce",
+          "title": "What is Adobe Commerce?",
+          "description": "Overview of the e-commerce platform",
+          "estimatedMinutes": 30,
+          "hasQuiz": true,
+          "hasAssignment": false
+        },
+        {
+          "id": "paas-vs-saas",
+          "title": "PaaS vs SaaS",
+          "description": "Understanding deployment models",
+          "estimatedMinutes": 45,
+          "hasQuiz": true,
+          "hasAssignment": false
+        },
+        {
+          "id": "what-is-app-builder",
+          "title": "Introduction to App Builder",
+          "description": "Understanding Adobe Developer App Builder for extensibility",
+          "estimatedMinutes": 60,
+          "hasQuiz": true,
+          "hasAssignment": false
+        }
+      ],
+      "chapterQuiz": true,
+      "chapterAssignment": true
+    },
+    {
+      "id": "events-and-communication",
+      "title": "Chapter 2: Events and Communication",
+      "description": "Understanding event-driven architecture and Adobe Commerce events",
+      "estimatedHours": 6,
+      "topics": [
+        {
+          "id": "event-driven-architecture",
+          "title": "Event-Driven Architecture Model",
+          "description": "How events enable loose coupling and scalability",
+          "estimatedMinutes": 45,
+          "hasQuiz": true,
+          "hasAssignment": false
+        },
+        {
+          "id": "events-fundamentals",
+          "title": "Adobe Commerce Events",
+          "description": "Understanding how Commerce publishes events",
+          "estimatedMinutes": 60,
+          "hasQuiz": true,
+          "hasAssignment": false
+        }
+      ],
+      "chapterQuiz": true,
+      "chapterAssignment": true
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "overallProgress": 35,
+  "currentChapter": 2,
+  "currentTopic": "events-fundamentals",
+  "chaptersCompleted": ["foundation-concepts"],
+  "topicsCompleted": [
+    { "id": "what-is-adobe-commerce", "completedAt": "2024-01-15", "status": "completed", "score": 90 },
+    { "id": "paas-vs-saas", "completedAt": "2024-01-16", "status": "completed", "score": 85 },
+    { "id": "what-is-app-builder", "completedAt": "2024-01-17", "status": "completed", "score": 95 }
+  ],
+  "quizzesTaken": 3,
+  "averageQuizScore": 90,
+  "assignmentsCompleted": 1,
+  "assignmentsInProgress": 1,
+  "totalStudyTimeMinutes": 180,
+  "lastSessionDate": "2024-01-20",
+  "streakDays": 5,
+  "longestStreak": 5,
+  "achievements": [
+    { "id": "first-lesson", "name": "First Steps", "earnedAt": "2024-01-15" },
+    { "id": "quiz-ace", "name": "Quiz Ace", "earnedAt": "2024-01-17" }
+  ]
+}
