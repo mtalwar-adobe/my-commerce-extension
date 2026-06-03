@@ -19,12 +19,25 @@ import {
 } from '@adobe/react-spectrum';
 import appConfigImport from '../config.json';
 
-/** Parcel/babel may expose JSON as `{ default: {...} }` or the object directly. */
+/** Parcel/babel may nest `default` several times around the JSON module export. */
 function resolveAppConfig (raw) {
-  if (!raw || typeof raw !== 'object') {
+  let cfg = raw;
+  while (
+    cfg &&
+    typeof cfg === 'object' &&
+    cfg.default &&
+    typeof cfg.default === 'object' &&
+    !cfg.registration &&
+    !cfg['admin-ui-sdk/registration'] &&
+    !cfg['get-enriched-orders'] &&
+    !cfg['admin-ui-sdk/get-enriched-orders']
+  ) {
+    cfg = cfg.default;
+  }
+  if (!cfg || typeof cfg !== 'object') {
     return {};
   }
-  return raw.default && typeof raw.default === 'object' ? raw.default : raw;
+  return cfg;
 }
 
 /** Injected at build/deploy into config.json (see aio app deploy / get-url). */
