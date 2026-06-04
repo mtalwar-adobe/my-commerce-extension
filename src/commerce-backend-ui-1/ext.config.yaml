@@ -1,3 +1,6 @@
+hooks:
+  post-app-build: node scripts/pin-backend-ui-web-assets.js
+
 operations:
   view:
     - type: web

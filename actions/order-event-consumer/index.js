@@ -2,17 +2,52 @@ const { Core } = require('@adobe/aio-sdk');
 const stateLib = require('@adobe/aio-lib-state');
 const { getImsAccessToken } = require('../ims-token');
 
+function isSaasCommerceBase(baseUrl) {
+  return /api\.commerce\.adobe\.com/i.test(String(baseUrl));
+}
+
+/** Numeric store id for ACCS `?storeId=` — not the Magento store *code*. */
+function resolveStoreId(p, eventData) {
+  if (eventData?.store_id != null && String(eventData.store_id).trim()) {
+    return String(eventData.store_id).trim();
+  }
+  if (p?.storeId != null && String(p.storeId).trim()) {
+    return String(p.storeId).trim();
+  }
+  if (p?.COMMERCE_STORE_ID != null && String(p.COMMERCE_STORE_ID).trim()) {
+    return String(p.COMMERCE_STORE_ID).trim();
+  }
+  return '';
+}
+
+/** REST path uses entity_id; increment_id in the URL usually returns 404. */
+function resolveOrderEntityId(eventData) {
+  if (eventData?.entity_id != null && String(eventData.entity_id).length > 0) {
+    return String(eventData.entity_id);
+  }
+  if (eventData?.id != null && String(eventData.id).length > 0) {
+    return String(eventData.id);
+  }
+  return null;
+}
+
+function commerceApiHeaders(params, accessToken) {
+  return {
+    Authorization: `Bearer ${accessToken}`,
+    'x-api-key': params.IMS_OAUTH_S2S_CLIENT_ID,
+    'x-gw-ims-org-id': params.IMS_OAUTH_S2S_ORG_ID,
+    'Content-Type': 'application/json',
+  };
+}
+
 /** SaaS (ACCS) order path; on-prem uses `/rest/{store}/V1/orders/{id}`. */
-function orderResourceUrl(baseUrl, orderId, p) {
+function orderResourceUrl(baseUrl, orderId, p, eventData) {
   const b = String(baseUrl).replace(/\/$/, '');
   const id = encodeURIComponent(String(orderId));
 
-  if (/api\.commerce\.adobe\.com/i.test(b)) {
+  if (isSaasCommerceBase(b)) {
     let path = `${b}/V1/orders/${id}`;
-    const storeId =
-      (p && p.storeId != null && String(p.storeId).trim()) ||
-      (p && p.COMMERCE_STORE_CODE && String(p.COMMERCE_STORE_CODE).trim()) ||
-      '';
+    const storeId = resolveStoreId(p, eventData);
     if (storeId) {
       path += `?storeId=${encodeURIComponent(storeId)}`;
     }
@@ -21,6 +56,118 @@ function orderResourceUrl(baseUrl, orderId, p) {
 
   const storeCode = (p && p.COMMERCE_STORE_CODE) || 'default';
   return `${b}/rest/${encodeURIComponent(storeCode)}/V1/orders/${id}`;
+}
+
+function orderSearchUrl(baseUrl, p, eventData) {
+  const b = String(baseUrl).replace(/\/$/, '');
+  if (isSaasCommerceBase(b)) {
+    let path = `${b}/V1/orders`;
+    const storeId = resolveStoreId(p, eventData);
+    if (storeId) {
+      path += `?storeId=${encodeURIComponent(storeId)}`;
+    }
+    return path;
+  }
+  const storeCode = (p && p.COMMERCE_STORE_CODE) || 'default';
+  return `${b}/rest/${encodeURIComponent(storeCode)}/V1/orders`;
+}
+
+function fetchErrorBody(status, orderId, orderUrl, incrementId) {
+  const body = {
+    error: `Failed to fetch order ${orderId}`,
+    status,
+    orderUrl,
+  };
+  if (status === 404) {
+    body.hint =
+      'Confirm the order exists and COMMERCE_API_BASE_URL / store scope are correct. '
+      + 'REST GET /V1/orders/{id} requires entity_id (not increment_id). '
+      + 'For ACCS, set COMMERCE_STORE_ID (numeric store id) or ensure the event includes store_id.';
+    if (incrementId) {
+      body.incrementId = String(incrementId);
+    }
+  } else if (status === 401 || status === 403) {
+    body.hint =
+      'Check IMS S2S credentials and that IMS_OAUTH_S2S_SCOPES includes Commerce API access for this tenant.';
+  }
+  return body;
+}
+
+async function searchOrderByIncrementId(
+  baseUrl,
+  incrementId,
+  params,
+  eventData,
+  accessToken,
+  logger
+) {
+  const listUrl = orderSearchUrl(baseUrl, params, eventData);
+  const criteria = new URLSearchParams({
+    'searchCriteria[filter_groups][0][filters][0][field]': 'increment_id',
+    'searchCriteria[filter_groups][0][filters][0][value]': String(incrementId),
+    'searchCriteria[filter_groups][0][filters][0][condition_type]': 'eq',
+  });
+  const separator = listUrl.includes('?') ? '&' : '?';
+  const url = `${listUrl}${separator}${criteria.toString()}`;
+  logger.info(`Searching order by increment_id: ${url}`);
+
+  const res = await fetch(url, { headers: commerceApiHeaders(params, accessToken) });
+  if (!res.ok) {
+    return null;
+  }
+  const data = await res.json();
+  const items = data.items || data;
+  return Array.isArray(items) && items.length > 0 ? items[0] : null;
+}
+
+async function fetchOrderFromCommerce(
+  baseUrl,
+  entityId,
+  incrementId,
+  params,
+  eventData,
+  accessToken,
+  logger
+) {
+  const orderUrl = orderResourceUrl(baseUrl, entityId, params, eventData);
+  logger.info(`Fetching order from: ${orderUrl}`);
+
+  const orderResponse = await fetch(orderUrl, {
+    headers: commerceApiHeaders(params, accessToken),
+  });
+
+  if (orderResponse.ok) {
+    return orderResponse.json();
+  }
+
+  const status = orderResponse.status;
+  const errText = await orderResponse.text();
+  logger.error(
+    `Commerce API returned ${status} for order ${entityId}: ${errText.slice(0, 500)}`
+  );
+
+  if (
+    status === 404 &&
+    incrementId &&
+    String(incrementId) !== String(entityId)
+  ) {
+    const found = await searchOrderByIncrementId(
+      baseUrl,
+      incrementId,
+      params,
+      eventData,
+      accessToken,
+      logger
+    );
+    if (found) {
+      return found;
+    }
+  }
+
+  return {
+    error: fetchErrorBody(status, entityId, orderUrl, incrementId),
+    status,
+  };
 }
 
 async function main(params) {
@@ -52,17 +199,27 @@ async function main(params) {
       }
     }
 
-    const orderId =
-      eventData.entity_id || eventData.increment_id || eventData.id;
-    if (!orderId) {
-      logger.warn('No order ID found in event payload');
+    const entityId = resolveOrderEntityId(eventData);
+    const incrementId = eventData.increment_id;
+    if (!entityId) {
+      logger.warn('No order entity_id in event payload', {
+        increment_id: incrementId,
+        keys: Object.keys(eventData),
+      });
       return {
         statusCode: 200,
-        body: { message: 'No order ID in payload, skipping', eventId },
+        body: {
+          message: 'No order entity_id in payload, skipping',
+          eventId,
+          increment_id: incrementId,
+        },
       };
     }
 
-    logger.info(`Processing order: ${orderId}`);
+    logger.info(`Processing order entity_id=${entityId}`, {
+      increment_id: incrementId,
+      store_id: eventData.store_id,
+    });
 
     const rawBase = params.COMMERCE_API_BASE_URL;
     if (!rawBase || typeof rawBase !== 'string') {
@@ -74,30 +231,27 @@ async function main(params) {
     }
 
     const accessToken = await getImsAccessToken(params);
-    const orderUrl = orderResourceUrl(rawBase, orderId, params);
-    logger.info(`Fetching order from: ${orderUrl}`);
+    const fetchResult = await fetchOrderFromCommerce(
+      rawBase,
+      entityId,
+      incrementId,
+      params,
+      eventData,
+      accessToken,
+      logger
+    );
 
-    const orderResponse = await fetch(orderUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'x-api-key': params.IMS_OAUTH_S2S_CLIENT_ID,
-        'x-gw-ims-org-id': params.IMS_OAUTH_S2S_ORG_ID,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!orderResponse.ok) {
-      const errText = await orderResponse.text();
-      logger.error(
-        `Commerce API returned ${orderResponse.status} for order ${orderId}: ${errText.slice(0, 500)}`
-      );
+    if (fetchResult.error) {
       return {
-        statusCode: 500,
-        body: { error: `Failed to fetch order ${orderId}` },
+        statusCode: fetchResult.status >= 400 && fetchResult.status < 600
+          ? fetchResult.status
+          : 500,
+        body: fetchResult.error,
       };
     }
 
-    const order = await orderResponse.json();
+    const order = fetchResult;
+    const stateOrderId = String(order.entity_id || entityId);
 
     const enrichedOrder = {
       orderId: order.entity_id,
@@ -121,7 +275,7 @@ async function main(params) {
 
     logger.info('Enriched order:', JSON.stringify(enrichedOrder));
 
-    await state.put(`order-${orderId}`, JSON.stringify(enrichedOrder), {
+    await state.put(`order-${stateOrderId}`, JSON.stringify(enrichedOrder), {
       ttl: 604800,
     });
 
@@ -142,8 +296,8 @@ async function main(params) {
         knownOrderIds = [];
       }
     }
-    if (!knownOrderIds.includes(String(orderId))) {
-      knownOrderIds.push(String(orderId));
+    if (!knownOrderIds.includes(stateOrderId)) {
+      knownOrderIds.push(stateOrderId);
       if (knownOrderIds.length > 100) {
         knownOrderIds = knownOrderIds.slice(-100);
       }
@@ -152,13 +306,16 @@ async function main(params) {
       });
     }
 
-    logger.info(`Successfully processed event ${eventId} for order ${orderId}`);
+    logger.info(
+      `Successfully processed event ${eventId} for order ${stateOrderId}`
+    );
     return {
       statusCode: 200,
       body: {
         message: 'Event processed successfully',
         eventId,
-        orderId,
+        orderId: stateOrderId,
+        incrementId: order.increment_id,
         orderTier: enrichedOrder.enrichment.orderTier,
       },
     };

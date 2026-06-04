@@ -19,6 +19,7 @@ application:
             inputs:
               LOG_LEVEL: info
               COMMERCE_STORE_CODE: $COMMERCE_STORE_CODE
+              COMMERCE_STORE_ID: $COMMERCE_STORE_ID
               COMMERCE_API_BASE_URL: $COMMERCE_API_BASE_URL
               IMS_OAUTH_S2S_ORG_ID: $IMS_OAUTH_S2S_ORG_ID
               IMS_OAUTH_S2S_CLIENT_ID: $IMS_OAUTH_S2S_CLIENT_ID
@@ -36,6 +37,7 @@ application:
             inputs:
               LOG_LEVEL: info
               COMMERCE_STORE_CODE: $COMMERCE_STORE_CODE
+              COMMERCE_STORE_ID: $COMMERCE_STORE_ID
               COMMERCE_API_BASE_URL: $COMMERCE_API_BASE_URL
               IMS_OAUTH_S2S_ORG_ID: $IMS_OAUTH_S2S_ORG_ID
               IMS_OAUTH_S2S_CLIENT_ID: $IMS_OAUTH_S2S_CLIENT_ID
